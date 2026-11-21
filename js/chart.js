@@ -112,11 +112,12 @@
       lbl.textContent = `✓ ${fmtTime(sleepReady.time)}`;
     }
 
-    // Intake markers on the baseline
+    // Intake markers sit on the curve at the moment each drink was started
     const intakeG = el("g", { class: "intakes" }, svg);
     for (const it of intakes) {
       if (it.time < start || it.time > end) continue;
-      el("circle", { cx: x(it.time), cy: M.top + ih, r: 5, class: "intake-dot" }, intakeG);
+      const level = opts.model.amountAt(opts.entries, it.time, opts.halfLife);
+      el("circle", { cx: x(it.time), cy: y(level), r: 5, class: "intake-dot" }, intakeG);
     }
 
     // Crosshair + tooltip
