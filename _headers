@@ -1,0 +1,7 @@
+# Netlify response headers
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+
+# Always re-check the service worker so app updates arrive promptly
+/sw.js
+  Cache-Control: no-cache
