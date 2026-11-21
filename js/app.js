@@ -130,6 +130,7 @@
       time, ...d,
     });
     save();
+    window.Analytics.track("drink-added", { drink: selectedDrink.id, size: size.label });
     $("f-time").value = toLocalInput(Date.now());
     renderAll();
   }
@@ -143,11 +144,14 @@
     const s = state.settings;
     if (bed == null || bed <= now) { out.textContent = ""; return; }
     const t = Model.lastCallTime(state.entries, d, bed, s.threshold, s.halfLife, now);
-    const what = `${Math.round(d.mg)} mg ${selectedDrink.id === "custom" ? "drink" : selectedDrink.name.toLowerCase()}`;
+    const mg = Math.round(d.mg);
+    // "an 80 mg…", "an 11 mg…", "an 18 mg…" (numbers said with a leading vowel sound)
+    const article = /^8/.test(String(mg)) || mg === 11 || mg === 18 ? "an" : "a";
+    const what = `${article} ${mg} mg ${selectedDrink.id === "custom" ? "drink" : selectedDrink.name.toLowerCase()}`;
     if (t == null) {
-      out.innerHTML = `<span class="status-icon warn" aria-hidden="true">!</span> Having a ${Chart.escapeHtml(what)} now would keep you above ${s.threshold} mg at bedtime (${fmtTime(bed)}).`;
+      out.innerHTML = `<span class="status-icon warn" aria-hidden="true">!</span> Having ${Chart.escapeHtml(what)} now would keep you above ${s.threshold} mg at bedtime (${fmtTime(bed)}).`;
     } else {
-      out.innerHTML = `<span class="status-icon ok" aria-hidden="true">✓</span> Latest you can start a ${Chart.escapeHtml(what)} and still be under ${s.threshold} mg by bedtime (${fmtTime(bed)}): <strong>${fmtDayTime(t, now)}</strong>.`;
+      out.innerHTML = `<span class="status-icon ok" aria-hidden="true">✓</span> Latest you can start ${Chart.escapeHtml(what)} and still be under ${s.threshold} mg by bedtime (${fmtTime(bed)}): <strong>${fmtDayTime(t, now)}</strong>.`;
     }
   }
 
@@ -168,6 +172,7 @@
       li.querySelector("button").addEventListener("click", () => {
         state.entries = state.entries.filter((x) => x.id !== e.id);
         save();
+        window.Analytics.track("drink-removed", { drink: e.drinkId });
         renderAll();
       });
       list.appendChild(li);
@@ -200,6 +205,7 @@
       s.preset = sel.value;
       if (p) { s.halfLife = p.hours; $("s-half").value = p.hours; }
       save(); renderAll();
+      window.Analytics.track("setting-changed", { setting: "half-life-preset", preset: sel.value });
     });
     $("s-half").addEventListener("change", () => {
       const v = Number($("s-half").value);
@@ -315,6 +321,13 @@
     $("f-mg").value = size.mg;
     $("f-dur").value = size.durationMin ?? selectedDrink.durationMin;
     updateLastCall();
+  });
+  // Which other settings people bother to change (the name only, never the value)
+  for (const [id, setting] of [["s-half", "half-life-custom"], ["s-bed", "bedtime"], ["s-thr", "threshold"], ["s-weight", "weight"]]) {
+    $(id).addEventListener("change", () => window.Analytics.track("setting-changed", { setting }));
+  }
+  document.querySelector(".table-view").addEventListener("toggle", (e) => {
+    if (e.target.open) window.Analytics.track("table-view-opened");
   });
   $("f-mg").addEventListener("input", updateLastCall);
   $("f-dur").addEventListener("input", updateLastCall);
