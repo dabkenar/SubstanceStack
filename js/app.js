@@ -107,6 +107,9 @@
     $("f-time").value = toLocalInput(Date.now());
     $("drink-form").hidden = false;
     updateLastCall();
+    // In the phone sheet, bring the form up so the Add button is reachable
+    if (phoneQuery.matches) $("drink-form").scrollIntoView({ behavior: "smooth", block: "start" });
+    window.Analytics.track("drink-selected", { drink: id, last_call: lastCallState });
   }
 
   function formDrink() {
@@ -130,13 +133,33 @@
       time, ...d,
     });
     save();
-    window.Analytics.track("drink-added", { drink: selectedDrink.id, size: size.label });
+    const A = window.Analytics;
+    const nowMs = Date.now();
+    A.track("drink-added", {
+      drink: selectedDrink.id,
+      size: size.label,
+      mg_range: A.mgRange(d.mg),
+      amount_edited: d.mg !== size.mg ? "yes" : "no",
+      duration_range: A.durationRange(d.durationMin),
+      timing: time > nowMs + 5 * 60000 ? "planned" : time < nowMs - 15 * 60000 ? "backdated" : "now",
+      day_part: A.dayPart(time),
+      last_call: lastCallState, // what the sleep message said just before adding
+    });
     $("f-time").value = toLocalInput(Date.now());
     renderAll();
+    if (phoneQuery.matches) {
+      closeSheet();
+      setTab("today");
+    }
+    showToast(`${selectedDrink.id === "custom" ? "Drink" : selectedDrink.name} added`);
   }
+
+  // What the last-call message currently says: "ok", "warning", or "none" (not shown).
+  let lastCallState = "none";
 
   function updateLastCall() {
     const out = $("last-call");
+    lastCallState = "none";
     const d = formDrink();
     if (!d || !selectedDrink) { out.textContent = ""; return; }
     const now = Date.now();
@@ -148,6 +171,7 @@
     // "an 80 mg…", "an 11 mg…", "an 18 mg…" (numbers said with a leading vowel sound)
     const article = /^8/.test(String(mg)) || mg === 11 || mg === 18 ? "an" : "a";
     const what = `${article} ${mg} mg ${selectedDrink.id === "custom" ? "drink" : selectedDrink.name.toLowerCase()}`;
+    lastCallState = t == null ? "warning" : "ok";
     if (t == null) {
       out.innerHTML = `<span class="status-icon warn" aria-hidden="true">!</span> Having ${Chart.escapeHtml(what)} now would keep you above ${s.threshold} mg at bedtime (${fmtTime(bed)}).`;
     } else {
@@ -311,6 +335,94 @@
       `</tbody></table>`;
   }
 
+  // ---------- phone layout: tabs, add-drink sheet, toast ----------
+  const phoneQuery = window.matchMedia("(max-width: 640px)");
+
+  function setTab(tab) {
+    if (document.body.dataset.active === tab) return;
+    document.body.dataset.active = tab;
+    for (const b of document.querySelectorAll(".tab")) {
+      if (b.dataset.go === tab) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+    }
+    window.scrollTo(0, 0);
+    if (tab === "today") renderAll(); // the chart sizes itself to its now-visible container
+    window.Analytics.track("tab-viewed", { tab });
+  }
+
+  function openSheet() {
+    $("add-card").classList.add("open");
+    $("sheet-backdrop").hidden = false;
+    document.body.classList.add("sheet-open");
+    window.Analytics.track("sheet-opened");
+    setTimeout(() => (document.querySelector(".drink-btn[aria-pressed='true']") || document.querySelector(".drink-btn")).focus({ preventScroll: true }), 300);
+  }
+
+  function closeSheet() {
+    $("add-card").classList.remove("open");
+    $("sheet-backdrop").hidden = true;
+    document.body.classList.remove("sheet-open");
+  }
+
+  let toastTimer;
+  function showToast(text) {
+    const t = $("toast");
+    t.textContent = `✓ ${text}`;
+    t.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
+  }
+
+  document.body.dataset.active = "today";
+  for (const b of document.querySelectorAll(".tab")) b.addEventListener("click", () => setTab(b.dataset.go));
+  $("tab-add").addEventListener("click", openSheet);
+  $("sheet-close").addEventListener("click", closeSheet);
+  $("sheet-backdrop").addEventListener("click", closeSheet);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeSheet(); });
+  phoneQuery.addEventListener("change", () => { closeSheet(); renderAll(); });
+
+  // ---------- installable app ----------
+  const INSTALL_DISMISSED_KEY = "substancestack.installDismissed";
+  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  let deferredPrompt = null;
+
+  if ("serviceWorker" in navigator && location.protocol === "https:") {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  }
+
+  function showInstallBanner(how) {
+    if (isStandalone || localStorage.getItem(INSTALL_DISMISSED_KEY) === "1") return;
+    if (how) $("install-how").textContent = how;
+    $("install-banner").hidden = false;
+  }
+
+  window.addEventListener("beforeinstallprompt", (e) => { // Android / Chrome
+    e.preventDefault();
+    deferredPrompt = e;
+    $("install-btn").hidden = false;
+    showInstallBanner();
+  });
+  if (isIOS && !isStandalone) {
+    showInstallBanner("Tap the Share button, then “Add to Home Screen”.");
+  }
+  $("install-btn").addEventListener("click", async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    window.Analytics.track("install-prompt", { outcome });
+    deferredPrompt = null;
+    $("install-banner").hidden = true;
+  });
+  $("install-dismiss").addEventListener("click", () => {
+    localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+    $("install-banner").hidden = true;
+    window.Analytics.track("install-banner-dismissed");
+  });
+  window.addEventListener("appinstalled", () => {
+    $("install-banner").hidden = true;
+    window.Analytics.track("app-installed");
+  });
+
   // ---------- wire up ----------
   buildDrinkGrid();
   buildSettings();
@@ -339,4 +451,41 @@
   window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderAll, 120); });
   setInterval(renderAll, 60 * 1000); // keep "now" current
   renderAll();
+
+  // ---------- anonymous analytics: per-visit properties + opening state ----------
+  (function reportVisit() {
+    const A = window.Analytics;
+    const SEEN_KEY = "substancestack.seen";
+    const returning = localStorage.getItem(SEEN_KEY) === "1";
+    localStorage.setItem(SEEN_KEY, "1");
+
+    const now = Date.now();
+    const s = state.settings;
+    const recent = state.entries.filter((e) => e.time >= now - 48 * HOUR);
+    A.identify({
+      visitor: returning ? "returning" : "new",
+      log_size: A.countRange(recent.length),
+      half_life_preset: s.preset,
+      threshold: s.threshold === DEFAULT_SETTINGS.threshold ? "default" : "custom",
+      weight_set: s.weightLb ? "yes" : "no",
+      layout: phoneQuery.matches ? "phone" : "desktop",
+      installed: isStandalone ? "yes" : "no",
+    });
+
+    let status = "no-drinks", bedtime = "n/a";
+    if (recent.length) {
+      status = Model.amountAt(state.entries, now, s.halfLife) > s.threshold ? "over-threshold" : "under-threshold";
+      const bed = upcomingBedtime(now);
+      if (bed != null && bed > now) bedtime = Model.amountAt(state.entries, bed, s.halfLife) > s.threshold ? "over" : "under";
+    }
+    A.track("app-opened", { status, bedtime, day_part: A.dayPart(now) });
+  })();
+
+  // First chart interaction per visit (the chart redraws, so listen on its container)
+  let chartHoverSent = false;
+  $("chart").addEventListener("pointermove", () => {
+    if (chartHoverSent) return;
+    chartHoverSent = true;
+    window.Analytics.track("chart-hovered");
+  });
 })();
