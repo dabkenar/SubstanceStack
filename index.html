@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SubstanceStack · Caffeine tracker</title>
+  <meta name="description" content="Track the caffeine in your body over time and see when you'll be ready for sleep.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="app viz-root">
+    <header class="header">
+      <h1>SubstanceStack</h1>
+      <p class="tagline">How much caffeine is in your body, and when you'll be ready to sleep.</p>
+    </header>
+
+    <section class="stats" aria-label="Summary">
+      <div class="stat">
+        <div class="stat-label">In your body now</div>
+        <div class="stat-value" id="stat-now">0 mg</div>
+        <div class="stat-sub" id="stat-now-sub">&nbsp;</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Sleep-ready at</div>
+        <div class="stat-value" id="stat-ready">Now</div>
+        <div class="stat-sub" id="stat-ready-sub">&nbsp;</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label" id="stat-bed-label">At bedtime</div>
+        <div class="stat-value" id="stat-bed">0 mg</div>
+        <div class="stat-sub" id="stat-bed-sub">&nbsp;</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Last 24 hours</div>
+        <div class="stat-value" id="stat-total">0 mg</div>
+        <div class="stat-sub" id="stat-total-sub">of 400 mg/day FDA guideline</div>
+      </div>
+    </section>
+
+    <section class="card chart-card">
+      <div class="card-head">
+        <h2>Caffeine in your body</h2>
+        <span class="hint">Shaded area is the projection. Hover or tap the chart for exact values.</span>
+      </div>
+      <div class="chart-wrap">
+        <div id="chart" class="chart"></div>
+        <div id="tooltip" class="tooltip" role="status" hidden></div>
+      </div>
+      <details class="table-view">
+        <summary>Show as table</summary>
+        <div id="table" class="table-scroll"></div>
+      </details>
+    </section>
+
+    <div class="columns">
+      <section class="card">
+        <h2>Add a drink</h2>
+        <div class="drink-grid" id="drink-grid" role="group" aria-label="Choose a drink"></div>
+
+        <form id="drink-form" class="drink-form" hidden>
+          <div class="form-row">
+            <label>Size
+              <select id="f-size"></select>
+            </label>
+            <label>Caffeine (mg)
+              <input id="f-mg" type="number" min="1" max="1500" step="1" required>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Started drinking
+              <input id="f-time" type="datetime-local" required>
+            </label>
+            <label>Took me (minutes)
+              <input id="f-dur" type="number" min="0" max="240" step="1" required>
+            </label>
+          </div>
+          <div class="form-row form-actions">
+            <button type="button" class="btn-secondary" id="f-now">Set to now</button>
+            <button type="submit" class="btn-primary" id="f-add">Add drink</button>
+          </div>
+          <p class="last-call" id="last-call"></p>
+        </form>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Your drinks</h2>
+          <button type="button" class="btn-link" id="clear-log" hidden>Clear all</button>
+        </div>
+        <ul class="log" id="log"></ul>
+        <p class="empty" id="log-empty">No drinks logged in the last 48 hours.</p>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Your settings</h2>
+      <div class="settings">
+        <label>Caffeine half-life
+          <select id="s-preset"></select>
+        </label>
+        <label>Half-life (hours)
+          <input id="s-half" type="number" min="1.5" max="24" step="0.5">
+        </label>
+        <label>Bedtime
+          <input id="s-bed" type="time">
+        </label>
+        <label>Sleep threshold (mg)
+          <input id="s-thr" type="number" min="5" max="300" step="5">
+        </label>
+        <label>Body weight (lb, optional)
+          <input id="s-weight" type="number" min="60" max="600" step="1" placeholder="e.g. 160">
+        </label>
+      </div>
+      <p class="hint">Half-life is how long your body takes to clear half the caffeine. It varies a lot between people, so if you know you're sensitive, pick a longer one.</p>
+    </section>
+
+    <section class="card research">
+      <h2>How the model works</h2>
+      <p>Caffeine is modeled as a <strong>one-compartment model with first-order absorption and elimination</strong>, the standard pharmacokinetic model for caffeine taken by mouth. Each drink is absorbed at a steady rate over the time it takes you to drink it, then every dose adds up.</p>
+      <ul>
+        <li><strong>Absorption:</strong> almost 100% of the caffeine you drink reaches your blood (Blanchard &amp; Sawers, 1983). Liquid caffeine peaks about 40 minutes after you drink it, and coffee and cola peak at the same time (42 vs. 39 min). Capsules peak later, at about 67 min (Liguori et al., 1997). The model uses an absorption rate of 5.5/h for drinks and 2.9/h for pills, which reproduces those peaks. Sipping slowly spreads the dose out and flattens the peak.</li>
+        <li><strong>Elimination:</strong> the half-life is about 5 hours in a typical healthy adult, but it ranges from about 1.5 to 9.5 hours. Smokers clear caffeine faster. Oral contraceptives roughly double the half-life, and late pregnancy can stretch it to about 15 hours (Nehlig, 2018; Institute of Medicine, 2001).</li>
+        <li><strong>Sleep threshold:</strong> a meta-analysis of 24 studies found that a 107 mg coffee should be drunk at least 8.8 h before bed, and a 217.5 mg pre-workout at least 13.2 h before bed, to avoid losing sleep (Gardiner et al., 2023). At a 5 h half-life, both of those cutoffs leave about 30–35 mg in the body at bedtime, so the default threshold is 30 mg. 400 mg taken even 6 h before bed cut sleep by over an hour (Drake et al., 2013).</li>
+        <li><strong>Body weight</strong> is used only to estimate blood concentration (caffeine spreads through about 0.7 L per kg of body weight).</li>
+      </ul>
+      <p class="hint">These are population averages, not medical advice. Your own response depends on genetics (the CYP1A2 enzyme), medications, liver health and tolerance. Caffeine amounts are typical values, so check your labels. Full references are in <a href="RESEARCH.md">RESEARCH.md</a>.</p>
+    </section>
+  </div>
+
+  <script src="js/drinks.js"></script>
+  <script src="js/model.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
