@@ -41,7 +41,10 @@ more than an hour.
 Values are typical figures from USDA FoodData Central (coffee, espresso, tea),
 the CSPI Caffeine Chart (sodas, energy drinks) and manufacturer labels
 (Celsius 200 mg / 12 oz, Celsius Essentials 270 mg / 16 oz, Guayakí canned
-yerba mate 150 mg / 15.5 oz). Home-brewed coffee and tea vary by a factor of 2
+yerba mate 150 mg / 15.5 oz). A full traditional mate gourd session (about 15
+refills) is set to 260 mg, the midpoint of the 243–273 mg measured across a
+15-serving session in a 2026 study in *Beverages* (MDPI). It defaults to
+60 minutes of drinking. Home-brewed coffee and tea vary by a factor of 2
 or more, so every amount can be edited.
 
 ### Known limitations

@@ -82,7 +82,9 @@
       b.className = "drink-btn";
       b.dataset.id = d.id;
       b.setAttribute("aria-pressed", "false");
-      b.innerHTML = `<span class="drink-name">${Chart.escapeHtml(d.name)}</span><span class="drink-mg">${d.sizes[0].mg} mg+</span>`;
+      b.innerHTML =
+        `<span class="drink-icon">${window.DrinkIcons.get(d.id)}</span>` +
+        `<span class="drink-name">${Chart.escapeHtml(d.name)}</span><span class="drink-mg">${d.sizes[0].mg} mg+</span>`;
       if (d.id === "custom") b.querySelector(".drink-mg").textContent = "any amount";
       b.addEventListener("click", () => selectDrink(d.id));
       grid.appendChild(b);
@@ -309,7 +311,9 @@
   $("drink-form").addEventListener("submit", addDrink);
   $("f-now").addEventListener("click", () => { $("f-time").value = toLocalInput(Date.now()); });
   $("f-size").addEventListener("change", () => {
-    $("f-mg").value = selectedDrink.sizes[Number($("f-size").value)].mg;
+    const size = selectedDrink.sizes[Number($("f-size").value)];
+    $("f-mg").value = size.mg;
+    $("f-dur").value = size.durationMin ?? selectedDrink.durationMin;
     updateLastCall();
   });
   $("f-mg").addEventListener("input", updateLastCall);

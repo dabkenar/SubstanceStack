@@ -7,7 +7,8 @@
 //   "beverage" – liquid caffeine (coffee, tea, soda, energy drinks)
 //   "capsule"  – tablets/capsules, which peak later (Liguori et al. 1997)
 // `durationMin` is the default time it takes to finish the drink. Sipping
-// spreads the dose out, which delays and flattens the peak.
+// spreads the dose out, which delays and flattens the peak. A size can
+// override it with its own `durationMin` (e.g. a mate gourd sipped for an hour).
 (function (root) {
   const DRINKS = [
     {
@@ -55,6 +56,8 @@
       sizes: [
         { label: "8 oz brewed", mg: 80 },
         { label: "15.5 oz can (Guayakí)", mg: 150 },
+        // Full traditional session, ~15 refills: 243–273 mg measured (Beverages, 2026)
+        { label: "Full gourd (~15 refills)", mg: 260, durationMin: 60 },
       ],
     },
     {
