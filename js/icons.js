@@ -28,6 +28,13 @@
     energy: wrap(can + '<path d="M17.5 11.5l-3.5 5.5h4.5l-3.5 5.5"/>'),
     "black-tea": wrap(teaCup + '<path d="M13 14V8.5"/><rect x="11" y="4" width="4" height="4.5" rx="1"/>'),
     "green-tea": wrap(teaCup + '<path d="M11 11c0-3.5 3.5-6 8-6 0 4.5-3.5 7-8 6z"/><path d="M11 11l4.5-3.5"/>'),
+    // Chawan bowl with a bamboo whisk.
+    matcha: wrap(
+      '<path d="M4 16h24c0 6-5.4 10-12 10S4 22 4 16z"/>' +
+      '<path d="M12 28h8"/>' +
+      '<path d="M22.5 3.5L19.5 10"/>' +
+      '<path d="M19.5 10l-4 5M19.5 10l-1.2 5.5M19.5 10l1.6 5.3"/>'
+    ),
     "yerba-mate": wrap(
       '<path d="M9 13c-2.2 3-2.2 8 1 11.2 3 3 9 3 12 0 3.2-3.2 3.2-8.2 1-11.2z"/>' +
       '<path d="M18 13l5-9h3"/>' +

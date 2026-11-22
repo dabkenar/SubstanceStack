@@ -52,6 +52,17 @@
       ],
     },
     {
+      // Whole powdered leaf is drunk, so it's far stronger than steeped green tea:
+      // 18.9–44.4 mg caffeine per gram of powder (Kochman et al., Molecules 2021 review).
+      id: "matcha", name: "Matcha", absorption: "beverage", durationMin: 15,
+      sizes: [
+        { label: "Usucha (1 tsp, ~2 g)", mg: 70, durationMin: 10 },
+        { label: "Koicha (thick, ~4 g)", mg: 140, durationMin: 10 },
+        { label: "12 oz matcha latte", mg: 60 },
+        { label: "16 oz matcha latte", mg: 80 },
+      ],
+    },
+    {
       id: "yerba-mate", name: "Yerba mate", absorption: "beverage", durationMin: 25,
       sizes: [
         { label: "8 oz brewed", mg: 80 },

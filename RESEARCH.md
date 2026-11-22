@@ -44,7 +44,11 @@ the CSPI Caffeine Chart (sodas, energy drinks) and manufacturer labels
 yerba mate 150 mg / 15.5 oz). A full traditional mate gourd session (about 15
 refills) is set to 260 mg, the midpoint of the 243–273 mg measured across a
 15-serving session in a 2026 study in *Beverages* (MDPI). It defaults to
-60 minutes of drinking. Home-brewed coffee and tea vary by a factor of 2
+60 minutes of drinking. Matcha is stronger than steeped green tea because the
+whole powdered leaf is drunk: commercial matchas measured 18.9–44.4 mg caffeine
+per gram (Kochman et al., *Molecules*, 2021). A 2 g usucha is set to 70 mg and a
+4 g koicha to 140 mg. Café matcha lattes are set to about 5 mg per oz (80 mg for
+16 oz). Home-brewed coffee and tea vary by a factor of 2
 or more, so every amount can be edited.
 
 ### Known limitations
@@ -60,6 +64,7 @@ or more, so every amount can be edited.
 - Drake C, Roehrs T, Shambroom J, Roth T. Caffeine effects on sleep taken 0, 3, or 6 hours before going to bed. *J Clin Sleep Med*. 2013;9(11):1195–1200.
 - Gardiner C, Weakley J, Burke LM, et al. The effect of caffeine on subsequent sleep: a systematic review and meta-analysis. *Sleep Med Rev*. 2023;69:101764.
 - Institute of Medicine. *Caffeine for the Sustainment of Mental Task Performance*. National Academies Press; 2001. (Ch. 2, Pharmacology of caffeine.)
+- Kochman J, Jakubczyk K, Antoniewicz J, Mruk H, Janda K. Health benefits and chemical composition of matcha green tea: a review. *Molecules*. 2021;26(1):85.
 - Liguori A, Hughes JR, Grass JA. Absorption and subjective effects of caffeine from coffee, cola and capsules. *Pharmacol Biochem Behav*. 1997;58(3):721–726.
 - Nehlig A. Interindividual differences in caffeine metabolism and factors driving caffeine consumption. *Pharmacol Rev*. 2018;70(2):384–411.
 - U.S. FDA. Spilling the beans: how much caffeine is too much? (400 mg/day for healthy adults.)

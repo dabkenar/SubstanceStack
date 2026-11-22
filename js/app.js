@@ -103,7 +103,7 @@
       sel.appendChild(o);
     });
     $("f-mg").value = selectedDrink.sizes[0].mg;
-    $("f-dur").value = selectedDrink.durationMin;
+    $("f-dur").value = selectedDrink.sizes[0].durationMin ?? selectedDrink.durationMin;
     $("f-time").value = toLocalInput(Date.now());
     $("drink-form").hidden = false;
     updateLastCall();
