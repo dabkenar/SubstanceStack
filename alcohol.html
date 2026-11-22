@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>SubstanceStack · Alcohol tracker</title>
+  <meta name="description" content="Estimate your blood alcohol over time and see when you'll be under the driving limit and clear for sleep.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#0d161c">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SubstanceStack">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="theme-night">
+  <div class="app viz-root">
+    <header class="header" data-tab="today">
+      <div class="header-row">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 5.5a10.5 10.5 0 1 0 5 15.5A8.5 8.5 0 0 1 21.5 5.5z"/><path d="M24 4.5v3M22.5 6h3"/></svg>
+          </span>
+          <h1>SubstanceStack</h1>
+        </div>
+        <nav class="mode-switch" aria-label="Tracker">
+          <a href="index.html">Caffeine</a>
+          <a href="alcohol.html" aria-current="page">Alcohol</a>
+        </nav>
+      </div>
+      <p class="tagline">Your estimated blood alcohol, and when you'll be under the driving limit and clear for sleep.</p>
+    </header>
+
+    <div class="install-banner" id="install-banner" data-tab="today" hidden>
+      <span class="install-icon" aria-hidden="true"><img src="icons/icon-192.png" alt="" width="36" height="36"></span>
+      <div class="install-text"><strong>Install SubstanceStack</strong><span id="install-how">Add it to your home screen for one-tap logging.</span></div>
+      <button type="button" class="btn-primary btn-small" id="install-btn" hidden>Install</button>
+      <button type="button" class="btn-icon" id="install-dismiss" aria-label="Dismiss">✕</button>
+    </div>
+
+    <section class="card setup-card" id="setup-card" data-tab="today" hidden>
+      <h2>First, two quick details</h2>
+      <p class="hint">Blood alcohol depends heavily on body size and sex. Until you set these, estimates use a 160 lb placeholder and the more cautious (female) body-water value.</p>
+      <div class="form-row">
+        <label>Sex (for body water)
+          <select id="setup-sex">
+            <option value="unspecified">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </label>
+        <label>Body weight (lb)
+          <input id="setup-weight" type="number" min="60" max="600" step="1" placeholder="e.g. 160" inputmode="numeric">
+        </label>
+      </div>
+      <div class="form-actions"><button type="button" class="btn-primary" id="setup-save">Save</button></div>
+    </section>
+
+    <section class="stats" aria-label="Summary" data-tab="today">
+      <div class="stat">
+        <div class="stat-label">Estimated BAC now</div>
+        <div class="stat-value" id="stat-now">0.000%</div>
+        <div class="stat-sub" id="stat-now-sub">&nbsp;</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label" id="stat-drive-label">Under 0.08 driving limit</div>
+        <div class="stat-value" id="stat-drive">Now</div>
+        <div class="stat-sub" id="stat-drive-sub">&nbsp;</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label" id="stat-sleep-label">Clear for sleep</div>
+        <div class="stat-value" id="stat-sleep">Now</div>
+        <div class="stat-sub" id="stat-sleep-sub">&nbsp;</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Standard drinks, last 24 h</div>
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-sub" id="stat-total-sub">&nbsp;</div>
+      </div>
+    </section>
+
+    <p class="safety-note" data-tab="today"><span class="status-icon warn" aria-hidden="true">!</span> <strong>Estimates only.</strong> Your real BAC can be much higher than shown, and impairment starts well below the legal limit. Never use this to decide whether you can drive. If you've been drinking, get a ride.</p>
+
+    <section class="card chart-card" data-tab="today">
+      <div class="card-head">
+        <h2>Estimated blood alcohol</h2>
+        <span class="hint">Shaded area is the projection. Hover or tap the chart for exact values.</span>
+      </div>
+      <div class="chart-wrap">
+        <div id="chart" class="chart"></div>
+        <div id="tooltip" class="tooltip" role="status" hidden></div>
+      </div>
+      <details class="table-view">
+        <summary>Show as table</summary>
+        <div id="table" class="table-scroll"></div>
+      </details>
+    </section>
+
+    <div class="columns">
+      <section class="card add-card" id="add-card" aria-labelledby="add-title">
+        <div class="sheet-head">
+          <span class="sheet-grabber" aria-hidden="true"></span>
+          <h2 id="add-title">Add a drink</h2>
+          <button type="button" class="btn-icon sheet-close" id="sheet-close" aria-label="Close">✕</button>
+        </div>
+        <div class="drink-grid" id="drink-grid" role="group" aria-label="Choose a drink"></div>
+
+        <form id="drink-form" class="drink-form" hidden>
+          <div class="form-row">
+            <label>Size
+              <select id="f-size"></select>
+            </label>
+            <label>Volume (oz)
+              <input id="f-oz" type="number" min="0.1" max="100" step="0.1" required inputmode="decimal">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Strength (% ABV)
+              <input id="f-abv" type="number" min="0.1" max="95" step="0.1" required inputmode="decimal">
+            </label>
+            <label>Took me (minutes)
+              <input id="f-dur" type="number" min="0" max="480" step="1" required>
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Started drinking
+              <input id="f-time" type="datetime-local" required>
+            </label>
+            <label class="check">
+              <input id="f-food" type="checkbox">
+              <span>Had a meal with it</span>
+            </label>
+          </div>
+          <p class="drink-summary" id="f-summary"></p>
+          <div class="form-row form-actions">
+            <button type="button" class="btn-secondary" id="f-now">Set to now</button>
+            <button type="submit" class="btn-primary" id="f-add">Add drink</button>
+          </div>
+          <p class="last-call" id="last-call"></p>
+        </form>
+      </section>
+
+      <section class="card" data-tab="log">
+        <div class="card-head">
+          <h2>Your drinks</h2>
+          <button type="button" class="btn-link" id="clear-log" hidden>Clear all</button>
+        </div>
+        <ul class="log" id="log"></ul>
+        <p class="empty" id="log-empty">No drinks logged in the last 48 hours.</p>
+      </section>
+    </div>
+
+    <section class="card" data-tab="settings">
+      <h2>Your settings</h2>
+      <div class="settings settings-6">
+        <label>Sex (for body water)
+          <select id="s-sex">
+            <option value="unspecified">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </label>
+        <label>Body weight (lb)
+          <input id="s-weight" type="number" min="60" max="600" step="1" placeholder="e.g. 160">
+        </label>
+        <label>Alcohol clearance
+          <select id="s-elim"></select>
+        </label>
+        <label>Driving limit
+          <select id="s-limit">
+            <option value="0.08">0.08% (US)</option>
+            <option value="0.05">0.05% (Utah, most of Europe, Australia)</option>
+            <option value="0.04">0.04% (US commercial drivers)</option>
+            <option value="0.02">0.02% (under 21 in many states)</option>
+          </select>
+        </label>
+        <label>Bedtime
+          <input id="s-bed" type="time">
+        </label>
+        <label>Sleep target
+          <select id="s-sleep">
+            <option value="0">0.00% (fully cleared)</option>
+            <option value="0.02">0.02% (nearly cleared)</option>
+          </select>
+        </label>
+      </div>
+      <p class="hint">Clearance is how fast your liver removes alcohol. Most people clear about 0.015% BAC per hour, but it ranges from about 0.010% to 0.025%. If you're not sure, “Slower” gives the more cautious estimate.</p>
+    </section>
+
+    <section class="card research" data-tab="settings">
+      <h2>How the model works</h2>
+      <p>This uses the <strong>Widmark model</strong>, the standard way forensic scientists estimate blood alcohol, with gradual absorption from the stomach. Each drink is absorbed at a steady rate over the time it takes you to drink it, then your liver removes alcohol at a roughly constant rate.</p>
+      <ul>
+        <li><strong>How much alcohol:</strong> grams of alcohol = volume × ABV × 0.789 g/mL. One US standard drink is 14 g, about a 12 oz beer, a 5 oz glass of wine or a 1.5 oz shot (NIAAA).</li>
+        <li><strong>Body water:</strong> alcohol spreads through the water in your body, so BAC = grams ÷ (r × body weight). The Widmark factor r is about 0.68 for men and 0.55 for women. “Prefer not to say” uses 0.55, the more cautious value.</li>
+        <li><strong>Absorption:</strong> on an empty stomach, BAC peaks about 30–60 minutes after a drink. Eating lowers the peak considerably (Jones &amp; Jönsson, 1994). The model only credits a meal with a 15% reduction and slower absorption, which is less than most studies find, to stay cautious.</li>
+        <li><strong>Elimination:</strong> about 0.015% BAC per hour on average, ranging from about 0.010% to 0.025% in most people. Regular heavy drinkers clear alcohol faster (Jones, 2010). Coffee, water and sleep don't speed it up.</li>
+        <li><strong>Driving:</strong> 0.08% is the legal limit in most of the US, but impairment starts much lower. At 0.02% judgment and the ability to track moving objects already decline, and at 0.05% coordination and response to emergencies are reduced (NHTSA).</li>
+        <li><strong>Sleep:</strong> alcohol at bedtime helps you fall asleep faster, but it disrupts the second half of the night, and at moderate to high doses it suppresses REM sleep (Ebrahim et al., 2013). In 4,098 people, even low intake (≤0.25 g/kg) measurably reduced overnight recovery, and the effect grew with dose (Pietilä et al., 2018). That's why the default sleep target is 0.00%.</li>
+      </ul>
+      <p class="hint">These are population averages, not medical or legal advice. Your real BAC also depends on genetics, medications, liver health, how fast you drank and what you ate. Pours and ABVs vary, so check labels. Full references are in <a href="RESEARCH.md">RESEARCH.md</a>.</p>
+      <p class="hint"><strong>Privacy:</strong> your drinks and settings are stored only in this browser. To improve the site, it sends anonymous, cookie-free usage stats to Umami: page visits, which drink types and sizes get added, which settings get changed, and coarse ranges (for example "1–2 standard drinks", "evening"). Your BAC, exact times and amounts, your sex, your weight and your drink log are never sent. If your browser has Do Not Track turned on, nothing is sent.</p>
+    </section>
+  </div>
+
+  <!-- Phone-only: sheet backdrop, toast, and bottom tab bar -->
+  <div class="sheet-backdrop" id="sheet-backdrop" hidden></div>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+  <button type="button" class="fab" id="tab-add">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <span>Add drink</span>
+  </button>
+  <nav class="tabbar" aria-label="Sections">
+    <button type="button" class="tab" data-go="today" aria-current="page">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 19h18"/><path d="M4 16c2.5-7 4.5-9 6.5-9s3 4 5 4 3-2 4.5-4"/></svg>
+      <span>Tonight</span>
+    </button>
+    <button type="button" class="tab" data-go="log">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+      <span>Drinks</span>
+    </button>
+    <button type="button" class="tab" data-go="settings">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+      <span>Settings</span>
+    </button>
+  </nav>
+
+  <script src="js/analytics.js"></script>
+  <script src="js/alcohol-drinks.js"></script>
+  <script src="js/alcohol-model.js"></script>
+  <script src="js/chart.js"></script>
+  <script src="js/icons.js"></script>
+  <script src="js/shell.js"></script>
+  <script src="js/alcohol-app.js"></script>
+</body>
+</html>

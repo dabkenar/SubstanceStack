@@ -1,10 +1,11 @@
 // Service worker: lets the installed app open offline.
 // Network-first, so every deploy shows up right away when online; the cache is
 // only a fallback when there's no connection.
-const CACHE = "substancestack-v1";
+const CACHE = "substancestack-v2";
 const CORE = [
-  "/", "/index.html", "/css/styles.css", "/manifest.webmanifest",
-  "/js/analytics.js", "/js/drinks.js", "/js/model.js", "/js/chart.js", "/js/icons.js", "/js/app.js",
+  "/", "/index.html", "/alcohol.html", "/css/styles.css", "/manifest.webmanifest",
+  "/js/analytics.js", "/js/drinks.js", "/js/model.js", "/js/chart.js", "/js/icons.js", "/js/shell.js", "/js/app.js",
+  "/js/alcohol-drinks.js", "/js/alcohol-model.js", "/js/alcohol-app.js",
   "/icons/icon-192.png", "/icons/apple-touch-icon.png",
 ];
 

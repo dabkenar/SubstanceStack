@@ -314,3 +314,83 @@ input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px s
   .install-text { flex: 1; display: flex; flex-direction: column; font-size: 13px; color: var(--text-secondary); line-height: 1.35; }
   .install-text strong { color: var(--text-primary); font-size: 14px; }
 }
+
+/* =====================================================================
+   Shared extras: tracker switch, setup card, safety note, checkbox row
+   ===================================================================== */
+.header-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.mode-switch {
+  display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px;
+  background: var(--surface-2); border: 1px solid var(--border);
+}
+.mode-switch a {
+  padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 600;
+  color: var(--text-secondary); text-decoration: none; transition: background-color .15s, color .15s;
+}
+.mode-switch a:hover { color: var(--text-primary); }
+.mode-switch a[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+
+.setup-card { border-color: var(--accent); }
+.setup-card .hint { margin-top: -6px; }
+.safety-note {
+  margin: -4px 0 18px; padding: 10px 14px; border-radius: 12px; font-size: 13.5px;
+  color: var(--text-secondary); background: var(--surface-2); border: 1px solid var(--border);
+}
+.safety-note strong { color: var(--text-primary); }
+label.check { flex-direction: row; align-items: center; gap: 8px; align-self: end; padding-bottom: 10px; cursor: pointer; }
+label.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.drink-summary { margin: -2px 0 12px; font-size: 13.5px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.drink-summary:empty { display: none; }
+.settings.settings-6 { grid-template-columns: repeat(3, 1fr); }
+.chart-svg .drive-dot { fill: var(--surface-1); stroke: var(--accent); stroke-width: 2.5; }
+.chart-svg .drive-label { fill: var(--accent); font-size: 12px; font-weight: 600; paint-order: stroke; stroke: var(--surface-1); stroke-width: 4px; stroke-linejoin: round; }
+
+@media (max-width: 640px) {
+  .mode-switch a { padding: 5px 11px; font-size: 13px; }
+  .settings.settings-6 { grid-template-columns: 1fr 1fr; }
+  .safety-note { margin: -2px 0 14px; font-size: 12.5px; }
+  label.check { padding-bottom: 12px; }
+}
+
+/* =====================================================================
+   "Night" theme (alcohol page): deep navy with soft cyan.
+   Contrast against --surface-1: text 14.2:1, secondary 9.0:1, muted 6.0:1,
+   series line 9.6:1, accent 10.4:1, good 6.9:1, critical 5.0:1.
+   ===================================================================== */
+body.theme-night {
+  color-scheme: dark;
+  --page:           #0d161c;
+  --surface-1:      #132029;
+  --surface-2:      #1a2b35;
+  --border:         #27404c;
+  --grid:           #1e323c;
+  --text-primary:   #e4eff2;
+  --text-secondary: #a9c3cb;
+  --text-muted:     #84a0a9;
+  --series-1:       #6fd3e2;   /* soft cyan */
+  --series-1-wash:  rgba(111, 211, 226, 0.13);
+  --future:         rgba(255, 255, 255, 0.03);
+  --accent:         #7fdbe8;
+  --accent-hover:   #a2e7f0;
+  --accent-soft:    #173a45;
+  --accent-ink:     #06222a;
+  --good:           #3dbd7d;
+  --good-text:      #7ddaa8;
+  --critical:       #e5636b;
+  --shadow:         0 1px 2px rgba(0, 0, 0, 0.25), 0 8px 24px rgba(0, 0, 0, 0.22);
+  background-image:
+    radial-gradient(1100px 520px at 10% -12%, rgba(111, 211, 226, 0.10), transparent 60%),
+    radial-gradient(900px 420px at 100% 0%, rgba(80, 120, 200, 0.10), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.9 0 0 0 0 1 0 0 0 0.03 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+.theme-night input, .theme-night select { background: #0f1a21; }
+.theme-night .status-icon { color: #06222a; }
+.theme-night .tooltip { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
+.theme-night .brand-mark { background: var(--accent-soft); color: var(--accent); }
+@media (max-width: 640px) {
+  .theme-night .tabbar { background: rgba(19, 32, 41, 0.94); }
+  .theme-night .fab { box-shadow: 0 6px 18px rgba(127, 219, 232, 0.25), 0 2px 4px rgba(0, 0, 0, 0.4); }
+  .theme-night .add-card { box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.5); }
+  .theme-night .sheet-backdrop { background: rgba(0, 0, 0, 0.55); }
+  .theme-night .install-banner { border-color: var(--border); }
+}

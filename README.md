@@ -1,7 +1,14 @@
 # SubstanceStack
 
-A caffeine tracker that charts how much caffeine is in your body over time and
-predicts when you'll be low enough to sleep.
+Two trackers that chart a substance in your body over time:
+
+- **Caffeine** (`index.html`, "morning coffee" day theme): how much caffeine is
+  in your body and when you'll be low enough to sleep.
+- **Alcohol** (`alcohol.html`, night theme): your estimated blood alcohol (BAC),
+  when you'll be under the driving limit, and when you'll be fully cleared for
+  sleep. It's an estimate only and must never be used to decide whether to drive.
+
+Caffeine page:
 
 - Log drinks (coffee, espresso, Celsius, black/green tea, yerba mate, soda,
   energy drinks, pills, or a custom amount), including how long you took to drink them
@@ -13,8 +20,16 @@ predicts when you'll be low enough to sleep.
   to the home screen as an app (web app manifest + offline service worker)
 - Anonymous, cookie-free usage stats via Umami (see the privacy note on the page)
 
-The model is a one-compartment pharmacokinetic model with parameters taken
-from published research. See [RESEARCH.md](RESEARCH.md) for details.
+Alcohol page:
+
+- Log beer, wine, shots, cocktails, seltzer/cider or a custom drink by volume and
+  ABV, with whether you ate; see standard drinks, BAC now, and when you'll be
+  under your chosen driving limit (0.08/0.05/0.04/0.02%) and fully cleared
+- Uses your sex and weight (Widmark body-water factor) and a clearance-rate preset
+
+The caffeine model is a one-compartment pharmacokinetic model and the alcohol
+model is the Widmark model with first-order absorption, both with parameters
+taken from published research. See [RESEARCH.md](RESEARCH.md) for details.
 
 ## Running it
 
